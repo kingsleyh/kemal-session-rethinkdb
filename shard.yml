@@ -1,0 +1,16 @@
+name: kemal-session-rethinkdb
+version: 0.1.0
+
+authors:
+  - Kingsley Hendrickse <kingsley.hendrickse@gmail.com>
+
+dependencies:
+  kemal-session:
+    github: kemalcr/kemal-session
+    branch: master
+  crystal-rethinkdb:
+    github: kingsleyh/crystal-rethinkdb
+
+crystal: 0.26.1
+
+license: MIT
