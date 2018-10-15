@@ -82,7 +82,6 @@ module Kemal
       end
 
       def create_session(session_id : String)
-        p "creating session with: #{session_id}"
         session = StorageInstance.new
         data = session.to_json
         r.table(@sessiontable).insert({session_id: session_id, data: data, updated_at: r.now}).run(@connection)
