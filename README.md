@@ -67,6 +67,10 @@ end
 |sessiontable | Name of the table to use for sessions - defaults to "sessions"
 |cachetime    | Number of seconds to hold the session data in memory, before re-reading from the database. This is set to 5 seconds by default, set to 0 to hit the db for every request.
 
+## Bugs
+
+Please raise any bugs as issues on github: [Issues](https://github.com/kingsleyh/kemal-session-rethinkdb/issues)
+
 ## Contributing
 
 1. Fork it (<https://github.com/kingsleyh/kemal-session-rethinkdb/fork>)
