@@ -2,6 +2,8 @@
 
 This is a [RethinkDB](http://rethinkdb.com/) adaptor for [Kemal Session](https://github.com/kemalcr/kemal-session)
 
+[![Build Status](https://travis-ci.org/kingsleyh/kemal-session-rethinkdb.svg?branch=master)](https://travis-ci.org/kingsleyh/kemal-session-rethinkdb) [![Crystal Version](https://img.shields.io/badge/crystal%20-0.26.1-brightgreen.svg)](https://crystal-lang.org/api/0.26.1/)
+
 ## Installation
 
 Add this to your application's `shard.yml`:
