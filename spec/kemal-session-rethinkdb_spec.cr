@@ -104,54 +104,54 @@ describe Kemal::Session::RethinkDBEngine do
     end
   end
 
-  # describe "#get" do
-  #   it "should return a valid Session" do
-  #     session = Kemal::Session.new(create_context(SESSION_ID))
-  #     get_session = Kemal::Session.get(SESSION_ID)
-  #     get_session.should_not be_nil
-  #     if get_session
-  #       session.id.should eq(get_session.id)
-  #       get_session.is_a?(Kemal::Session).should be_true
-  #     end
-  #   end
-  #
-  #   it "should return nil if the Session does not exist" do
-  #     session = Kemal::Session.get(SESSION_ID)
-  #     session.should be_nil
-  #   end
-  # end
-  # 
-  # describe "#create" do
-  #   it "should build an empty session" do
-  #     Kemal::Session.config.engine.create_session(SESSION_ID)
-  #     value = Db.scalar("select count(id) from sessions where session_id = ?",SESSION_ID)
-  #     value.should eq(1)
-  #   end
-  # end
-  #
-  # describe "#all" do
-  #   it "should return an empty array if none exist" do
-  #     arr = Kemal::Session.all
-  #     arr.is_a?(Array).should be_true
-  #     arr.size.should eq(0)
-  #   end
-  #
-  #   it "should return an array of Sessions" do
-  #     3.times { Kemal::Session.new(create_context(SecureRandom.hex)) }
-  #     arr = Kemal::Session.all
-  #     arr.is_a?(Array).should be_true
-  #     arr.size.should eq(3)
-  #   end
-  # end
-  #
-  # describe "#each" do
-  #   it "should iterate over all sessions" do
-  #     5.times { Kemal::Session.new(create_context(SecureRandom.hex)) }
-  #     count = 0
-  #     Kemal::Session.each do |session|
-  #       count = count + 1
-  #     end
-  #     count.should eq(5)
-  #   end
-  # end
+  describe "#get" do
+    it "should return a valid Session" do
+      session = Kemal::Session.new(create_context(SESSION_ID))
+      get_session = Kemal::Session.get(SESSION_ID)
+      get_session.should_not be_nil
+      if get_session
+        session.id.should eq(get_session.id)
+        get_session.is_a?(Kemal::Session).should be_true
+      end
+    end
+
+    it "should return nil if the Session does not exist" do
+      session = Kemal::Session.get(SESSION_ID)
+      session.should be_nil
+    end
+  end
+
+  describe "#create" do
+    it "should build an empty session" do
+      Kemal::Session.config.engine.create_session(SESSION_ID)
+      value = r.table("sessions").filter({session_id: SESSION_ID}).run(Conn).to_a.size
+      value.should eq(1)
+    end
+  end
+
+  describe "#all" do
+    it "should return an empty array if none exist" do
+      arr = Kemal::Session.all
+      arr.is_a?(Array).should be_true
+      arr.size.should eq(0)
+    end
+
+    it "should return an array of Sessions" do
+      3.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
+      arr = Kemal::Session.all
+      arr.is_a?(Array).should be_true
+      arr.size.should eq(3)
+    end
+  end
+
+  describe "#each" do
+    it "should iterate over all sessions" do
+      5.times { Kemal::Session.new(create_context(Random::Secure.hex)) }
+      count = 0
+      Kemal::Session.each do |session|
+        count = count + 1
+      end
+      count.should eq(5)
+    end
+  end
 end

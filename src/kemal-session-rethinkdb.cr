@@ -84,7 +84,6 @@ module Kemal
       def create_session(session_id : String)
         session = StorageInstance.new
         data = session.to_json
-        # TODO - (maybe?) if session exists replace or update the old one
         r.table(@sessiontable).insert({session_id: session_id, data: data, updated_at: r.now}).run(@connection)
         session
       end
@@ -95,17 +94,17 @@ module Kemal
       end
 
       def each_session
-        r.table(@sessiontable).to_a do |qr|
-          yield StorageInstance.from_json(qr.to_s)
+        r.table(@sessiontable).run(@connection).to_a.each do |qr|
+          yield StorageInstance.from_json(qr["data"].to_s)
         end
       end
 
       def get_session(session_id : String)
-        return Session.new(session_id) if session_exists?(session_id)
+        Session.new(session_id) if session_exists?(session_id)
       end
 
       def session_exists?(session_id : String) : Bool
-        !r.table(@sessiontable).get(session_id).nil?
+        !r.table(@sessiontable).get(session_id).run(@connection).raw.nil?
       end
 
       def destroy_session(session_id : String)
