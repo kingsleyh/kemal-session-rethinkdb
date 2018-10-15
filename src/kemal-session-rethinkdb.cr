@@ -82,6 +82,7 @@ module Kemal
       end
 
       def create_session(session_id : String)
+        p "creating session with: #{session_id}"
         session = StorageInstance.new
         data = session.to_json
         r.table(@sessiontable).insert({session_id: session_id, data: data, updated_at: r.now}).run(@connection)
@@ -117,8 +118,7 @@ module Kemal
 
       def load_into_cache(session_id : String) : StorageInstance
         begin
-          # json = @connection.query_one "select data from #{@sessiontable} where session_id = ?", session_id, &.read(String)
-          json = r.table(@sessiontable).get(session_id).run(@connection).to_s
+          json = r.table(@sessiontable).get(session_id).run(@connection)["data"].to_s
           @cache[session_id] = StorageInstance.from_json(json)
         rescue ex
           # recreates session based on id, if it has been deleted?
@@ -126,7 +126,6 @@ module Kemal
         end
         @cached_session_read_times[session_id] = Time.utc_now
         r.table(@sessiontable).update({session_id: session_id, updated_at: r.now}).run(@connection)
-        # @connection.exec("update #{@sessiontable} set updated_at = NOW() where session_id = ?",session_id)
         @cache[session_id]
       end
 
@@ -170,7 +169,6 @@ module Kemal
         bool:   Bool,
         object: Session::StorableObject::StorableObjectContainer,
       })
-      # bottom
     end
   end
 end
