@@ -82,19 +82,15 @@ module Kemal
       end
 
       def create_session(session_id : String)
-        p 1
         session = StorageInstance.new
         data = session.to_json
         r.table(@sessiontable).insert({session_id: session_id, data: data, updated_at: r.now}, conflict: "replace").run(@connection)
-        p r.table(@sessiontable).run(@connection).to_a
         session
       end
 
       def save_cache(session_id)
         data = @cache[session_id].to_json
         r.table(@sessiontable).filter({session_id: session_id}).update({data: data, updated_at: r.now}).run(@connection)
-        p 2
-        p r.table(@sessiontable).run(@connection).to_a
       end
 
       def each_session
@@ -121,19 +117,14 @@ module Kemal
 
       def load_into_cache(session_id : String) : StorageInstance
         begin
-          p 3
           json = r.table(@sessiontable).filter({session_id: session_id}).run(@connection).to_a.first["data"].to_s
           @cache[session_id] = StorageInstance.from_json(json)
         rescue ex
-          p 3.1
           # recreates session based on id, if it has been deleted?
           @cache[session_id] = create_session(session_id)
         end
-        p 4
         @cached_session_read_times[session_id] = Time.utc_now
         r.table(@sessiontable).filter({session_id: session_id}).update({updated_at: r.now}).run(@connection)
-        p 5
-        p r.table(@sessiontable).run(@connection).to_a
         @cache[session_id]
       end
 
