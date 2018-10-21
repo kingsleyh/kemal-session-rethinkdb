@@ -18,7 +18,7 @@ Spec.after_each do
 end
 
 def get_from_db(session_id : String)
-  r.table("sessions").get(session_id).run(Conn)["data"].to_s
+  r.table("sessions").filter({session_id: session_id}).run(Conn).to_a.first["data"].to_s
 end
 
 def create_context(session_id : String)

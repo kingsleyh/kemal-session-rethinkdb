@@ -57,7 +57,7 @@ module Kemal
 
       def initialize(@connection : RethinkDB::Connection, @sessiontable : String = "sessions", @cachetime : Int32 = 5)
         # check if table exists, if not create it
-        r.table_create(@sessiontable, primary_key: "session_id").run(@connection) unless r.table_list.run(@connection).includes?(@sessiontable)
+        r.table_create(@sessiontable).run(@connection) unless r.table_list.run(@connection).includes?(@sessiontable)
         @cache = {} of String => StorageInstance
         @cached_session_read_times = {} of String => Time
       end
@@ -82,15 +82,19 @@ module Kemal
       end
 
       def create_session(session_id : String)
+        p 1
         session = StorageInstance.new
         data = session.to_json
         r.table(@sessiontable).insert({session_id: session_id, data: data, updated_at: r.now}, conflict: "replace").run(@connection)
+        p r.table(@sessiontable).run(@connection).to_a
         session
       end
 
       def save_cache(session_id)
         data = @cache[session_id].to_json
         r.table(@sessiontable).filter({session_id: session_id}).update({data: data, updated_at: r.now}).run(@connection)
+        p 2
+        p r.table(@sessiontable).run(@connection).to_a
       end
 
       def each_session
@@ -104,7 +108,7 @@ module Kemal
       end
 
       def session_exists?(session_id : String) : Bool
-        !r.table(@sessiontable).get(session_id).run(@connection).raw.nil?
+        r.table(@sessiontable).filter({session_id: session_id}).run(@connection).to_a.size > 0
       end
 
       def destroy_session(session_id : String)
@@ -117,14 +121,19 @@ module Kemal
 
       def load_into_cache(session_id : String) : StorageInstance
         begin
-          json = r.table(@sessiontable).get(session_id).run(@connection)["data"].to_s
+          p 3
+          json = r.table(@sessiontable).filter({session_id: session_id}).run(@connection).to_a.first["data"].to_s
           @cache[session_id] = StorageInstance.from_json(json)
         rescue ex
+          p 3.1
           # recreates session based on id, if it has been deleted?
           @cache[session_id] = create_session(session_id)
         end
+        p 4
         @cached_session_read_times[session_id] = Time.utc_now
-        r.table(@sessiontable).update({session_id: session_id, updated_at: r.now}).run(@connection)
+        r.table(@sessiontable).filter({session_id: session_id}).update({updated_at: r.now}).run(@connection)
+        p 5
+        p r.table(@sessiontable).run(@connection).to_a
         @cache[session_id]
       end
 
