@@ -68,7 +68,7 @@ module Kemal
         r.table(@sessiontable).filter { |x| x["updated_at"].lt(expiretime) }.delete().run(@connection)
         # delete old memory cache too, if it exists and is too old
         @cache.each do |session_id, session|
-          if @cached_session_read_times[session_id]? && (Time.utc_now.epoch - @cachetime) > @cached_session_read_times[session_id].epoch
+          if @cached_session_read_times[session_id]? && (Time.utc_now.to_unix - @cachetime) > @cached_session_read_times[session_id].to_unix
             @cache.delete(session_id)
             @cached_session_read_times.delete(session_id)
           end
@@ -131,7 +131,7 @@ module Kemal
       def is_in_cache?(session_id : String) : Bool
         # only read from db once ever 'n' seconds. This should help with a single webpage hitting the db for every asset
         return false if !@cached_session_read_times[session_id]? # if not in cache reload it
-        not_too_old = (Time.utc_now.epoch - @cachetime) <= @cached_session_read_times[session_id].epoch
+        not_too_old = (Time.utc_now.to_unix - @cachetime) <= @cached_session_read_times[session_id].to_unix
         return not_too_old # if it is too old, load_into_cache will get called and it'll be reloaded
       end
 

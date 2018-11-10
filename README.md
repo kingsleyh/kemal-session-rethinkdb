@@ -2,7 +2,7 @@
 
 This is a [RethinkDB](http://rethinkdb.com/) adaptor for [Kemal Session](https://github.com/kemalcr/kemal-session)
 
-[![Build Status](https://travis-ci.org/kingsleyh/kemal-session-rethinkdb.svg?branch=master)](https://travis-ci.org/kingsleyh/kemal-session-rethinkdb) [![Crystal Version](https://img.shields.io/badge/crystal%20-0.26.1-brightgreen.svg)](https://crystal-lang.org/api/0.26.1/)
+[![Build Status](https://travis-ci.org/kingsleyh/kemal-session-rethinkdb.svg?branch=master)](https://travis-ci.org/kingsleyh/kemal-session-rethinkdb) [![Crystal Version](https://img.shields.io/badge/crystal%20-0.27.0-brightgreen.svg)](https://crystal-lang.org/api/0.27.0/)
 
 ## Installation
 
@@ -56,7 +56,7 @@ Session.config do |config|
   config.secret = "a_secret"
   config.engine = Session::RethinkDBEngine.new(
     connection: connection,
-    sessiontable: "sessions", 
+    sessiontable: "sessions",
     cachetime: 5
   )
   config.timeout = Time::Span.new(1, 0, 0)
