@@ -57,7 +57,7 @@ module Kemal
 
       def initialize(@connection : RethinkDB::Connection, @sessiontable : String = "sessions", @cachetime : Int32 = 5)
         # check if table exists, if not create it
-        r.table_create(@sessiontable).run(@connection) unless r.table_list.run(@connection).includes?(@sessiontable)
+        r.table_create(@sessiontable).run(@connection) unless r.table_list.run(@connection).as_a.includes?(@sessiontable)
         @cache = {} of String => StorageInstance
         @cached_session_read_times = {} of String => Time
       end

@@ -14,7 +14,7 @@ Spec.before_each do
 end
 
 Spec.after_each do
-  r.table_drop("sessions").run(Conn) if r.table_list.run(Conn).includes?("sessions")
+  r.table_drop("sessions").run(Conn) if r.table_list.run(Conn).as_a.includes?("sessions")
 end
 
 def get_from_db(session_id : String)
