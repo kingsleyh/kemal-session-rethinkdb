@@ -1,5 +1,6 @@
 require "json"
 require "kemal-session"
+require "json_mapping"
 
 module Kemal
   class Session
@@ -64,20 +65,21 @@ module Kemal
 
       def run_gc
         # delete old sessions here
-        expiretime = Time.now - Kemal::Session.config.timeout
+        expiretime = Time.utc - Kemal::Session.config.timeout
         r.table(@sessiontable).filter { |x| x["updated_at"].lt(expiretime) }.delete().run(@connection)
         # delete old memory cache too, if it exists and is too old
         @cache.each do |session_id, session|
-          if @cached_session_read_times[session_id]? && (Time.utc_now.to_unix - @cachetime) > @cached_session_read_times[session_id].to_unix
+          if @cached_session_read_times[session_id]? && (Time.utc.to_unix - @cachetime) > @cached_session_read_times[session_id].to_unix
             @cache.delete(session_id)
             @cached_session_read_times.delete(session_id)
           end
         end
       end
 
-      def all_sessions : Array(StorageInstance)
+      def all_sessions : Array(Session)
         r.table(@sessiontable).run(@connection).to_a.map do |qr|
-          StorageInstance.from_json(qr["data"].to_s)
+          Session.new(qr["data"].to_s)
+          # StorageInstance.from_json(qr["data"].to_s)
         end
       end
 
@@ -99,7 +101,7 @@ module Kemal
         end
       end
 
-      def get_session(session_id : String)
+      def get_session(session_id : String) : Kemal::Session?
         Session.new(session_id) if session_exists?(session_id)
       end
 
@@ -123,7 +125,7 @@ module Kemal
           # recreates session based on id, if it has been deleted?
           @cache[session_id] = create_session(session_id)
         end
-        @cached_session_read_times[session_id] = Time.utc_now
+        @cached_session_read_times[session_id] = Time.utc
         r.table(@sessiontable).filter({session_id: session_id}).update({updated_at: r.now}).run(@connection)
         @cache[session_id]
       end
@@ -131,7 +133,7 @@ module Kemal
       def is_in_cache?(session_id : String) : Bool
         # only read from db once ever 'n' seconds. This should help with a single webpage hitting the db for every asset
         return false if !@cached_session_read_times[session_id]? # if not in cache reload it
-        not_too_old = (Time.utc_now.to_unix - @cachetime) <= @cached_session_read_times[session_id].to_unix
+        not_too_old = (Time.utc.to_unix - @cachetime) <= @cached_session_read_times[session_id].to_unix
         return not_too_old # if it is too old, load_into_cache will get called and it'll be reloaded
       end
 

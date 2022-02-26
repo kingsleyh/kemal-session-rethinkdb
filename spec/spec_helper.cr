@@ -1,5 +1,5 @@
 require "spec"
-require "crystal-rethinkdb"
+require "rethinkdb"
 require "../src/kemal-session-rethinkdb"
 
 include RethinkDB::Shortcuts
@@ -35,11 +35,13 @@ def create_context(session_id : String)
   request = HTTP::Request.new("GET", "/", headers)
   return HTTP::Server::Context.new(request, response)
 end
+
 class UserJsonSerializer
-  JSON.mapping({
-    id:   Int32,
-    name: String,
-  })
+  include JSON::Serializable
+
+  property id : Int32
+  property name : String
+
   include Kemal::Session::StorableObject
 
   def initialize(@id : Int32, @name : String); end
